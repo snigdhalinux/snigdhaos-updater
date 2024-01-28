@@ -38,7 +38,7 @@ elif [ "$task" == "reinstall" ]; then
     [ $yusure != "y" ] && exit 1
     internal_update=2
 elif [ "$task" == "reset-snapper" ]; then
-    exec bash -c ". <(wget -qO- https://gitlab.com/garuda-linux/themes-and-settings/settings/garuda-common-settings/-/snippets/2147440/raw/main/reset-snapper)"
+    exec bash -c ". <(wget -qO- https://raw.githubusercontent.com/snigdhalinux/snigdhaos-updater/master/reset-snapper)"
 elif [ "$task" == "reset-audio" ]; then
     internal_update=0
 else
@@ -59,7 +59,7 @@ if [ "$reset_pacman" = true ]; then
     wget https://pkgbuild.com/~morganamilo/pacman-static/x86_64/bin/pacman-static -O $temp_file && chmod +x $temp_file && pacman="$temp_file" || { echo -e "\033[1;31m\nFailed to download pacman-static\n\033[0m"; }
     $pacman --version
 
-    wget https://gitlab.com/garuda-linux/tools/garuda-tools/-/raw/master/data/pacman-default.conf -O /etc/pacman.conf || { echo -e "\033[1;31m\nFailed to restore pacman.conf\n\033[0m"; }
+    wget https://raw.githubusercontent.com/snigdhalinux/snigdhaos-archiso-arctic/master/archiso-arctic/pacman.conf -O /etc/pacman.conf || { echo -e "\033[1;31m\nFailed to restore pacman.conf\n\033[0m"; }
 
     # Set global CDN mirrors
     wget https://archlinux.org/mirrorlist/all/ -O /etc/pacman.d/mirrorlist || true
@@ -69,12 +69,6 @@ Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch
 Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch
 EOF
 
-    # Set chaotic mirrors
-    wget https://aur.chaotic.cx/mirrorlist.txt -O /etc/pacman.d/chaotic-mirrorlist || cat <<-"EOF" > /etc/pacman.d/chaotic-mirrorlist
-Server = https://random-mirror.chaotic.cx/$repo/$arch
-Server = https://cdn-mirror.chaotic.cx/$repo/$arch
-Server = https://geo-mirror.chaotic.cx/$repo/$arch
-EOF
 fi
 
 if [ "$keyring" = true ]; then
@@ -90,7 +84,7 @@ if [ "$blackarch" == "true" ]; then
     bash <(wget -qO- https://blackarch.org/strap.sh) && SKIP_AUTOSNAP=1 SNAP_PAC_SKIP=y $pacman -S blackarch-keyring --noconfirm --needed || { echo -e "\033[1;31m\nFailed to fix blackarch\n\033[0m"; } # Too bad
 fi
 if [ "$keyring" = true ]; then
-    SKIP_AUTOSNAP=1 SNAP_PAC_SKIP=y $pacman -Sy archlinux-keyring chaotic-keyring --noconfirm
+    SKIP_AUTOSNAP=1 SNAP_PAC_SKIP=y $pacman -Sy archlinux-keyring --noconfirm
 fi
 
 if [ "$internal_update" = "1" ]; then
@@ -98,7 +92,7 @@ if [ "$internal_update" = "1" ]; then
 elif [ "$internal_update" = "2" ]; then
     $pacman -Qqn | $pacman -Sy -
 else
-    SKIP_AUTOSNAP=1 SNAP_PAC_SKIP=y $pacman -Sy --noconfirm --overwrite='*' garuda-update
+    SKIP_AUTOSNAP=1 SNAP_PAC_SKIP=y $pacman -Sy --noconfirm --overwrite='*' snigdhaos-updater
     PACMAN_EXE="$pacman" update
 fi
 
